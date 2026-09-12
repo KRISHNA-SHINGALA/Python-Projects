@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For You ❤️</title>
+    <style>
+        /* Basic reset aur dark background */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            overflow: hidden;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        /* Matrix Canvas jisme code girega */
+        canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1; /* Background me rakhne ke liye */
+        }
+
+        /* Text ke liye overlay jo canvas ke upar aayega */
+        #text-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2; /* Canvas ke upar rakhne ke liye */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none; /* Taki canvas par click ho sake */
+        }
+
+        /* Shuruati words ka design */
+        .word {
+            font-size: 6rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 10px #ff1493, 0 0 20px #ff1493, 0 0 40px #ff1493;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            text-transform: uppercase;
+        }
+
+        /* Fade in effect ke liye class */
+        .show {
+            opacity: 1;
+        }
+
+        /* Heart ka dhadakne wala effect */
+        .heart {
+            font-size: 8rem;
+            color: #ff1493;
+            animation: heartbeat 1s infinite alternate;
+            text-shadow: 0 0 20px #ff1493, 0 0 40px #ff1493;
+            margin-bottom: 20px;
+        }
+
+        @keyframes heartbeat {
+            from { transform: scale(1); }
+            to { transform: scale(1.15); }
+        }
+
+        /* Change hone wale names ka design */
+        .name {
+            font-size: 3.5rem;
+            color: #fff;
+            text-shadow: 0 0 15px #ff1493, 0 0 30px #ff1493;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Matrix effect yaha draw hoga -->
+    <canvas id="matrix"></canvas>
+
+    <!-- Humara main text yaha dikhega -->
+    <div id="text-overlay">
+        <div id="display-area" class="word"></div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 1. MATRIX RAIN EFFECT (Background Code)
+        // ==========================================
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Jo characters screen par girenge
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*♥♡'.split('');
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        const drops = [];
+
+        for (let x = 0; x < columns; x++) {
+            drops[x] = 1;
+        }
+
+        function drawMatrix() {
+            // Pichhe ka color thoda transparent black tak fade effect aaye
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Girne wale code ka color (Deep Pink)
+            ctx.fillStyle = '#ff1493';
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = characters[Math.floor(Math.random() * characters.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        setInterval(drawMatrix, 35); // Matrix ki speed
+
+
+        // ==========================================
+        // 2. TEXT ANIMATION LOGIC
+        // ==========================================
+        const displayArea = document.getElementById("display-area");
+        
+        const introWords = ["3", "2", "1", "You", "Are", "My", "Love"];
+        const names = [
+            "I love you sweetheart", 
+            "Husband ji", 
+            "Dharmik", 
+            "Dhruv", 
+            "Dikuuuu"
+        ];
+
+        let step = 0;
+
+        // Function jo ek-ek word dikhayega
+        function showWord(word, delay, callback) {
+            displayArea.innerHTML = word;
+            displayArea.classList.add("show");
+            
+            setTimeout(() => {
+                displayArea.classList.remove("show"); // Word ko hide karna
+                setTimeout(callback, 200); // Thoda pause lene ke baad next word
+            }, delay);
+        }
+
+        function playIntro() {
+            if (step < introWords.length) {
+                // Har word 0.8 seconds (800ms) ke liye dikhega
+                showWord(introWords[step], 800, playIntro);
+                step++;
+            } else {
+                // Intro khatam hone par heart aur names dikhana
+                startHeartAndNames();
+            }
+        }
+
+        function startHeartAndNames() {
+            let nameIndex = 0;
+            displayArea.classList.add("show"); // Isko hamesha ke liye visible kar denge
+            
+            function updateName() {
+                displayArea.innerHTML = `
+                    <div class="heart">❤️</div>
+                    <div class="name">✨ ${names[nameIndex]} ✨</div>
+                `;
+                nameIndex = (nameIndex + 1) % names.length;
+            }
+
+            updateName();
+            setInterval(updateName, 2000); // 2 second baad name change hoga
+        }
+
+        // Window resize hone par canvas bhi resize ho
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // 1 second ka wait karke animation start karna
+        setTimeout(playIntro, 1000);
+
+    </script>
+
+</body>
+</html>
